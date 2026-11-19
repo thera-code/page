@@ -1,0 +1,32 @@
+{
+    "ar": {
+        "site.home": "الرئيسية",
+        "site.posts": "المنشورات",
+        "site.login": "تسجيل الدخول",
+        "site.readMore": "اقرأ المزيد",
+        "site.back": "العودة إلى الرئيسية",
+        "site.notFound": "المنشور غير موجود",
+        "site.empty": "لا توجد منشورات بعد",
+        "site.language": "اللغة"
+    },
+    "fr": {
+        "site.home": "Accueil",
+        "site.posts": "Publications",
+        "site.login": "Connexion",
+        "site.readMore": "Lire la suite",
+        "site.back": "Retour",
+        "site.notFound": "Publication introuvable",
+        "site.empty": "Aucune publication",
+        "site.language": "Langue"
+    },
+    "en": {
+        "site.home": "Home",
+        "site.posts": "Posts",
+        "site.login": "Login",
+        "site.readMore": "Read more",
+        "site.back": "Back to home",
+        "site.notFound": "Post not found",
+        "site.empty": "No posts yet",
+        "site.language": "Language"
+    }
+}
