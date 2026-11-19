@@ -1,0 +1,54 @@
+[
+    {
+        "id": "menu_home",
+        "label_ar": "الرئيسية",
+        "label_fr": "Accueil",
+        "label_en": "Home",
+        "icon": "home",
+        "type": "link",
+        "target": "index.html",
+        "open_in_new_tab": false,
+        "order": 1,
+        "visible": true,
+        "roles": [
+            "guest",
+            "editor",
+            "super_admin"
+        ],
+        "children": []
+    },
+    {
+        "id": "menu_posts",
+        "label_ar": "المنشورات",
+        "label_fr": "Publications",
+        "label_en": "Posts",
+        "icon": "file",
+        "type": "link",
+        "target": "#posts",
+        "open_in_new_tab": false,
+        "order": 2,
+        "visible": true,
+        "roles": [
+            "guest",
+            "editor",
+            "super_admin"
+        ],
+        "children": []
+    },
+    {
+        "id": "menu_login",
+        "label_ar": "تسجيل الدخول",
+        "label_fr": "Connexion",
+        "label_en": "Login",
+        "icon": "user",
+        "type": "external",
+        "target": "https:\/\/rencontresyrienne-suisse.kesug.com\/login.php",
+        "open_in_new_tab": false,
+        "order": 3,
+        "visible": true,
+        "roles": [
+            "guest"
+        ],
+        "children": []
+    }
+]
