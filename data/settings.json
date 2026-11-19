@@ -13,7 +13,7 @@
     ],
     "show_login_button": false,
     "login_url": "",
-    "logo_path": "",
+    "logo_path": "logo.png",
     "lazy_loading": true,
     "animation_type": ""
 }
