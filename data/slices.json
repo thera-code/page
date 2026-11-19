@@ -1,20 +1,16 @@
 [
     {
         "id": "slice_hero",
-        "type": "text_block",
-        "order": 1,
-        "visible": true,
+        "type": "image_text",
         "title_ar": "مرحبًا بكم",
-        "title_fr": "Bienvenue",
-        "title_en": "Welcome",
-        "content_ar": "<p>الجمعية الخيرية - نعمل معًا لخدمة المجتمع<\/p>",
-        "content_fr": "<p>Association Caritative<\/p>",
-        "content_en": "<p>Charity Association<\/p>",
+        "content_ar": "<p>الجمعية الخيرية - نعمل معًا لخدمة المجتمع</p>",
         "image": "",
         "bg_color": "var(--pure-white)",
         "text_color": "var(--charcoal)",
         "padding": "large",
         "alignment": "center",
-        "animation": "fade_in"
+        "animation": "fade_in",
+        "order": 1,
+        "visible": true
     }
 ]
