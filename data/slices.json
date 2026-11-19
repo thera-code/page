@@ -4,7 +4,7 @@
         "type": "image_text",
         "title_ar": "مرحبًا بكم",
         "content_ar": "<p>الجمعية الخيرية - نعمل معًا لخدمة المجتمع</p>",
-        "image": "/assets/slices17950906922288.jpg",
+        "image": "/assets/slices/17950906922288.jpg",
         "bg_color": "var(--pure-white)",
         "text_color": "var(--charcoal)",
         "padding": "large",
