@@ -1,19 +1,19 @@
 {
-    "site_title_ar": "الجمعية الخيرية",
-    "site_title_fr": "Association Caritative",
-    "site_title_en": "Charity Association",
-    "site_description_ar": "نعمل معًا لخدمة المجتمع",
-    "site_description_fr": "Nous servons la communaute ensemble",
-    "site_description_en": "Together we serve the community",
-    "default_language": "ar",
+    "site_title_ar": "ملتقى السوريين الثقافي",
+    "site_title_fr": "",
+    "site_title_en": "",
+    "site_description_ar": "",
+    "site_description_fr": "",
+    "site_description_en": "",
+    "default_language": "",
     "active_languages": [
         "ar",
         "fr",
         "en"
     ],
     "show_login_button": true,
-    "login_url": "https:\/\/rencontresyrienne-suisse.kesug.com\/login.php",
-    "logo_path": "assets\/logo.svg",
+    "login_url": "",
+    "logo_path": "",
     "lazy_loading": true,
-    "animation_type": "fade_in"
+    "animation_type": ""
 }
