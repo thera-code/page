@@ -15,5 +15,24 @@
     "login_url": "",
     "logo_path": "logo.png",
     "lazy_loading": true,
-    "animation_type": ""
+    "animation_type": "",
+    "hero": {
+        "visible": true,
+        "mode": "color",
+        "size": "md",
+        "bg_color": "#16468c",
+        "text_color": "#ffffff",
+        "alignment": "center",
+        "title_ar": "",
+        "title_fr": "",
+        "title_en": "",
+        "subtitle_ar": "",
+        "subtitle_fr": "",
+        "subtitle_en": "",
+        "bg_image": "",
+        "offset_x": 0,
+        "offset_y": 0
+    },
+    "primary_color": "#D81E28",
+    "secondary_color": "#16468C"
 }
