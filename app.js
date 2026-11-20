@@ -10,10 +10,40 @@
     if (s === null || s === undefined) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+  function sanitizeHtml(dirty){
+    if (!dirty) return '';
+    const tpl = document.createElement('template');
+    tpl.innerHTML = String(dirty);
+    const allowed = new Set(['P','BR','B','STRONG','I','EM','U','H2','H3','H4','UL','OL','LI','A','BLOCKQUOTE','SPAN','DIV']);
+    const walk = (node) => {
+      Array.from(node.childNodes).forEach(child => {
+        if (child.nodeType === 1) {
+          if (!allowed.has(child.tagName)) {
+            child.remove();
+            return;
+          }
+          Array.from(child.attributes).forEach(attr => {
+            const nm = attr.name.toLowerCase();
+            if (child.tagName === 'A' && (nm === 'href' || nm === 'target' || nm === 'rel')) {
+              if (nm === 'href') child.setAttribute('href', safeHref(attr.value));
+            } else {
+              child.removeAttribute(attr.name);
+            }
+          });
+          if (child.tagName === 'A') {
+            child.setAttribute('rel', 'noopener noreferrer');
+          }
+          walk(child);
+        }
+      });
+    };
+    walk(tpl.content);
+    return tpl.innerHTML;
+  }
   function safeHref(href){
     if (!href) return '#';
     const h = String(href).trim();
-    if (h.startsWith('/') || h.startsWith('#') || h.startsWith('?')) return h;
+    if (h.startsWith('/') || h.startsWith('#') || h.startsWith('?') || h.startsWith('assets/') || h === 'index.html') return h;
     if (h.startsWith('data:image/')) return h;
     try {
       const u = new URL(h, location.href);
@@ -24,7 +54,7 @@
   function iconSvg(name){
     const svg = state.icons && state.icons[name];
     if (svg && /^<svg/i.test(svg)) return svg;
-    return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+    return '';
   }
   function getLang(){
     const params = new URLSearchParams(location.search);
@@ -68,6 +98,17 @@
     state.posts = Array.isArray(p) ? p : [];
     state.icons = ic || {};
   }
+  function applyBrandTheme(){
+    const root = document.documentElement;
+    if (state.settings.primary_color && /^#[0-9a-f]{6}$/i.test(state.settings.primary_color)) {
+      root.style.setProperty('--jura-red', state.settings.primary_color);
+    }
+    if (state.settings.secondary_color && /^#[0-9a-f]{6}$/i.test(state.settings.secondary_color)) {
+      root.style.setProperty('--unity-blue', state.settings.secondary_color);
+    }
+    const title = pickField(state.settings, 'site_title');
+    if (title) document.title = title;
+  }
   function applyDocLang(){
     const l = getLang();
     document.documentElement.lang = l;
@@ -79,7 +120,7 @@
     if (v !== undefined && v !== null && v !== '') return v;
     const ar = obj[base + '_ar'];
     if (ar !== undefined && ar !== null && ar !== '') return ar;
-    return '';
+    return obj[base + '_en'] || obj[base + '_fr'] || '';
   }
   function brandHtml(settings){
     const logo = safeHref(settings.logo_path || 'assets/logo.svg');
@@ -114,15 +155,16 @@
         const label = pickField(m, 'label') || '';
         const href = safeHref(m.target || '#');
         const target = m.open_in_new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
-        menuHtml += '<a href="' + escapeHtml(href) + '"' + target + '>' + escapeHtml(label) + '</a>';
+        const ic = m.icon ? iconSvg(m.icon) : '';
+        menuHtml += '<a href="' + escapeHtml(href) + '"' + target + '>' + ic + '<span>' + escapeHtml(label) + '</span></a>';
       });
     let html = '<div class="header-inner">';
     html += brandHtml(settings);
-    html += '<button class="icon-btn hamburger" id="hamburger" type="button" aria-label="menu">' + iconSvg('menu') + '</button>';
+    html += '<button class="icon-btn hamburger" id="hamburger" type="button" aria-label="menu">' + (iconSvg('menu')||'☰') + '</button>';
     html += '<nav class="header-nav" id="headerNav">' + menuHtml + '</nav>';
     html += '<div class="header-actions">';
     html += langSwitcherHtml();
-    if (showLogin) {
+    if (showLogin && loginUrl !== '#') {
       html += '<a class="icon-btn primary" href="' + escapeHtml(loginUrl) + '">' + iconSvg('user') + '<span>' + escapeHtml(t('site.login')) + '</span></a>';
     }
     html += '</div></div>';
@@ -145,7 +187,7 @@
     el.innerHTML = '<h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(desc) + '</p>';
   }
   function renderPostsGrid(limit){
-    const posts = state.posts.slice().sort((a,b)=> new Date(b.date||0) - new Date(a.date||0)).slice(0, limit||6);
+    const posts = state.posts.slice().sort((a,b)=> new Date(b.date||0) - new Date(a.date||0)).slice(0, limit||12);
     if (posts.length === 0){
       return '<div class="empty-state">' + escapeHtml(t('site.empty')) + '</div>';
     }
@@ -156,8 +198,8 @@
       const imageHtml = image && image !== '#' ? '<img class="post-card-image" src="' + escapeHtml(image) + '" alt="" loading="lazy">' : '';
       return '<article class="post-card" data-animation="' + escapeHtml(state.settings.animation_type||'fade_in') + '">' +
         imageHtml + '<div class="post-card-body"><h3>' + escapeHtml(title) + '</h3>' +
-        '<p>' + escapeHtml((excerpt || '').slice(0,200)) + '</p>' +
-        '<a class="read-more" href="post.html?id=' + encodeURIComponent(p.id) + '">' + escapeHtml(t('site.readMore')) + ' \u2192</a></div></article>';
+        '<p>' + escapeHtml((excerpt || '').slice(0,220)) + '</p>' +
+        '<a class="read-more" href="post.html?id=' + encodeURIComponent(p.id) + '">' + escapeHtml(t('site.readMore')) + '</a></div></article>';
     }).join('');
   }
   function renderSlice(slice){
@@ -170,27 +212,27 @@
     const fg = slice.text_color || 'var(--charcoal)';
     const anim = slice.animation || state.settings.animation_type || 'fade_in';
     const title = pickField(slice, 'title');
-    const content = pickField(slice, 'content');
+    const content = sanitizeHtml(pickField(slice, 'content'));
     const titleHtml = title ? '<h2 class="slice-title">' + escapeHtml(title) + '</h2>' : '';
     let body = '';
     if (type === 'text_block'){
-      body = titleHtml + '<div class="slice-content">' + (content || '') + '</div>';
+      body = titleHtml + '<div class="slice-content">' + content + '</div>';
     } else if (type === 'image_text'){
       const img = slice.image ? '<img src="' + escapeHtml(safeHref(slice.image)) + '" alt="" loading="lazy">' : '';
-      body = '<div class="image-text"><div><h2 class="slice-title">' + escapeHtml(title) + '</h2><div>' + (content||'') + '</div></div>' + img + '</div>';
+      body = '<div class="image-text"><div>' + titleHtml + '<div class="slice-content">' + content + '</div></div>' + img + '</div>';
     } else if (type === 'gallery'){
       const imgs = Array.isArray(slice.images) ? slice.images : [];
       body = titleHtml + '<div class="gallery">' + imgs.map(u => '<img src="' + escapeHtml(safeHref(u)) + '" alt="" loading="lazy">').join('') + '</div>';
     } else if (type === 'posts_grid'){
       body = titleHtml + '<div class="posts-grid">' + renderPostsGrid(6) + '</div>';
     } else if (type === 'cta'){
-      body = '<div class="cta-box"><h2>' + escapeHtml(title) + '</h2><div>' + (content||'') + '</div>' +
+      body = '<div class="cta-box"><h2>' + escapeHtml(title) + '</h2><div>' + content + '</div>' +
              (slice.button_url ? '<a class="btn-solid" href="' + escapeHtml(safeHref(slice.button_url)) + '">' + escapeHtml(pickField(slice,'button_label') || t('site.readMore')) + '</a>' : '') + '</div>';
     } else if (type === 'stats'){
       const stats = Array.isArray(slice.stats) ? slice.stats : [];
       body = titleHtml + '<div class="stats-grid">' + stats.map(s => '<div class="stat-card"><div class="stat-value">' + escapeHtml(String(s.value||'')) + '</div><div class="stat-label">' + escapeHtml(pickField(s,'label')) + '</div></div>').join('') + '</div>';
     } else if (type === 'contact_form'){
-      body = titleHtml + '<form class="contact-form" onsubmit="return false"><div><input type="text" placeholder="name"><input type="email" placeholder="email"></div><textarea placeholder="message" rows="4"></textarea><button class="btn-outline" type="submit">' + escapeHtml(t('site.readMore')) + '</button></form>';
+      body = titleHtml + '<form class="contact-form" onsubmit="alert(\'✓\');return false"><input type="text" required placeholder="Name / الاسم"><input type="email" required placeholder="Email"><textarea required placeholder="Message / الرسالة" rows="4"></textarea><button class="btn-outline" type="submit">' + escapeHtml(t('site.readMore')) + '</button></form>';
     }
     return '<section class="slice ' + pad + ' align-' + align + '" style="background:' + escapeHtml(bg) + ';color:' + escapeHtml(fg) + '" data-animation="' + escapeHtml(anim) + '"><div class="slice-inner">' + body + '</div></section>';
   }
@@ -202,14 +244,14 @@
   function buildPostsGrid(){
     const grid = document.getElementById('postsGrid');
     if (!grid) return;
-    grid.innerHTML = renderPostsGrid(6);
+    grid.innerHTML = renderPostsGrid(12);
   }
   function buildFooter(){
     const el = document.getElementById('siteFooter');
     if (!el) return;
     const title = pickField(state.settings, 'site_title') || 'الجمعية';
     const logo = safeHref(state.settings.logo_path || 'assets/logo.svg');
-    el.innerHTML = '<div class="footer-inner"><div class="footer-brand"><img src="' + escapeHtml(logo) + '" alt=""><span>' + escapeHtml(title) + '</span></div><p>' + escapeHtml(title) + ' - ' + new Date().getFullYear() + '</p></div>';
+    el.innerHTML = '<div class="footer-inner"><div class="footer-brand"><img src="' + escapeHtml(logo) + '" alt=""><span>' + escapeHtml(title) + '</span></div><p>' + escapeHtml(title) + ' &copy; ' + new Date().getFullYear() + '</p></div>';
   }
   function applyTranslations(){
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -234,23 +276,25 @@
     const id = new URLSearchParams(location.search).get('id');
     const post = state.posts.find(p => String(p.id) === String(id));
     if (!post){
-      el.innerHTML = '<div class="notice-box">' + escapeHtml(t('site.notFound')) + '</div><p style="text-align:center;margin-top:20px"><a class="post-back" href="index.html">\u2190 ' + escapeHtml(t('site.back')) + '</a></p>';
+      el.innerHTML = '<div class="notice-box">' + escapeHtml(t('site.notFound')) + '</div><p style="text-align:center;margin-top:20px"><a class="post-back" href="index.html">' + escapeHtml(t('site.back')) + '</a></p>';
       return;
     }
     const title = pickField(post, 'title');
-    const content = pickField(post, 'content');
+    const content = sanitizeHtml(pickField(post, 'content'));
     const date = post.date ? new Date(post.date).toLocaleDateString(getLang()==='ar'?'ar-EG':getLang()) : '';
     const image = safeHref(post.image || '');
+    document.title = title;
     let html = '<a class="post-back" href="index.html">' + iconSvg('arrow-left') + ' ' + escapeHtml(t('site.back')) + '</a>';
     html += '<h1 class="post-title">' + escapeHtml(title) + '</h1>';
     if (date) html += '<div class="post-meta">' + escapeHtml(date) + '</div>';
     if (image && image !== '#') html += '<img class="post-cover" src="' + escapeHtml(image) + '" alt="">';
-    html += '<div class="post-content">' + (content || '') + '</div>';
+    html += '<div class="post-content">' + content + '</div>';
     el.innerHTML = html;
   }
   async function init(){
     await loadAll();
     applyDocLang();
+    applyBrandTheme();
     buildHeader();
     if (document.getElementById('heroSection')) {
       buildHero(); buildSlices(); buildPostsGrid(); buildFooter(); applyTranslations(); setupAnimations();
