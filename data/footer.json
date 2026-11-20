@@ -1,0 +1,24 @@
+{
+    "visible": true,
+    "bg_color": "var(--charcoal)",
+    "text_color": "var(--pure-white)",
+    "border_top": "var(--jura-red)",
+    "layout": "3",
+    "blocks": [
+        {
+            "id": "footer_block_wtjbgvc9",
+            "type": "powered_by",
+            "column": 1,
+            "alignment": "center",
+            "visible": true,
+            "order": 1,
+            "team_name": "Thera_code",
+            "team_url": "",
+            "logo_url": "assets/images/c1fe1a8eb682259764143c2c.png",
+            "logo_style": "color",
+            "prefix_ar": "مدعوم بواسطة",
+            "prefix_fr": "Propulse par",
+            "prefix_en": "Powered by"
+        }
+    ]
+}
